@@ -19,7 +19,7 @@ npm install --global .
 gorombo-skill-harvester preflight --json
 ```
 
-The global install exposes the `gorombo-skill-harvester` command. Connect the repository through the local Codex plugin-development flow so Codex can load the included skill and completion hook. Public npm and Codex plugin-directory distribution are not live during the pre-release.
+The global install exposes the `gorombo-skill-harvester` command. Connect this repository as a local Codex plugin so Codex can load the included skill and completion hook.
 
 Preflight verifies the required Node version, discovers a compatible stable Codex CLI, checks Codex authentication, and confirms that Codex App Server is available. Its output excludes launcher paths, authentication details, and raw probe output.
 

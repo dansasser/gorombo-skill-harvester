@@ -1,16 +1,15 @@
 # Gorombo Skill Harvester
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue)](package.json)
-[![Status](https://img.shields.io/badge/status-pre--release-orange)](#release-status)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.13-brightgreen)](https://nodejs.org/)
 [![Codex](https://img.shields.io/badge/Codex_CLI-%3E%3D0.147-111827)](https://developers.openai.com/codex/cli/)
 [![Gorombo](https://img.shields.io/badge/by-Gorombo-black)](https://gorombo.com/)
-[![GitHub](https://img.shields.io/badge/GitHub-dansasser%2Fgorombo--skill--harvester-181717?logo=github)](https://github.com/dansasser/gorombo-skill-harvester)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/dansasser/gorombo-skill-harvester)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Gorombo Skill Harvester turns completed Codex work into durable, human-readable skill recommendations. It can deliver each recommendation through Telegram, to one selected Codex task, or to both. The Telegram route can also accept authorized text tasks and return their results.
 
-> **Pre-release:** Gorombo Skill Harvester can be verified and installed from source. Public npm and Codex plugin-directory distribution are not live yet.
+> Gorombo Skill Harvester can be installed and used with Codex from this repository.
 
 ## What it does
 
@@ -49,7 +48,7 @@ npm install --global .
 gorombo-skill-harvester preflight --json
 ```
 
-The global install exposes the `gorombo-skill-harvester` command. During pre-release development, connect this repository as a local Codex plugin so Codex can load its skill and completion hook. See the official [Codex plugin documentation](https://developers.openai.com/codex/plugins/).
+The global install exposes the `gorombo-skill-harvester` command. Connect this repository as a local Codex plugin so Codex can load its skill and completion hook. See the official [Codex plugin documentation](https://developers.openai.com/codex/plugins/).
 
 If upgrading from the previous product identity, stop and uninstall its user service first, then preserve the existing state with:
 
@@ -205,9 +204,9 @@ npm pack --dry-run --json
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Release status
+## Release
 
-Version 0.1.2 is the current pre-release source baseline. Public npm publication and Codex plugin-directory submission remain pending.
+Version 0.1.2 is the current public source release.
 
 ## License
 

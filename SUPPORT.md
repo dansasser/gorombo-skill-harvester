@@ -43,6 +43,6 @@ For feature requests, describe the affected user or workflow, the problem being 
 
 ## Support boundaries
 
-Gorombo Skill Harvester 0.1.x is a pre-release project maintained through its public repository on a best-effort basis. There is no guaranteed response or resolution time.
+Gorombo Skill Harvester 0.1.x is maintained through its public repository on a best-effort basis. There is no guaranteed response or resolution time.
 
 The project cannot provide support for unreviewed local modifications, unsupported runtime versions, third-party service outages, revoked or misconfigured credentials, or upstream products outside Gorombo Skill Harvester's control. A report is still useful when Gorombo Skill Harvester handles one of those conditions incorrectly.

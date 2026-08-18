@@ -6,7 +6,7 @@ Gorombo Skill Harvester coordinates Codex execution, Telegram messages, credenti
 
 | Version | Security support |
 | --- | --- |
-| Current 0.1.x pre-release | Supported |
+| Current 0.1.x | Supported |
 | Earlier development snapshots | Not supported |
 
 Reproduce a report against the latest available 0.1.x source when possible.

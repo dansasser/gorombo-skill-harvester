@@ -2,10 +2,6 @@
 
 Notable user-visible changes to Gorombo Skill Harvester are recorded here.
 
-## Unreleased
-
-- Public npm and Codex plugin-directory publication remain pending.
-
 ## 0.1.2 - 2026-08-17
 
 ### Added
