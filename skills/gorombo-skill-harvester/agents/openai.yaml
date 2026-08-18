@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gorombo Skill Harvester"
+  short_description: "Harvest reusable work and send useful alerts"
+  default_prompt: "Use $gorombo-skill-harvester to check readiness and harvest reusable work."

@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a reproducible problem in Gorombo Skill Harvester
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve Gorombo Skill Harvester. Remove secrets, identities, private paths, and task content before submitting.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest safe sequence that reproduces the issue.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Gorombo Skill Harvester version
+      placeholder: 0.1.2
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include relevant Node.js, Codex CLI, operating system, and delivery-route versions without private paths or credentials.
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Include safe error codes or logs after removing tokens, IDs, paths, task content, and other private values.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials and private information from this report.
+          required: true

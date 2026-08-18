@@ -1,0 +1,58 @@
+{
+  "name": "@gorombo/gorombo-skill-harvester",
+  "version": "0.1.2",
+  "description": "Durable Codex skill harvesting with Telegram and selected-task delivery.",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "gorombo-skill-harvester": "./src/cli.js"
+  },
+  "files": [
+    ".codex-plugin/",
+    "skills/",
+    "hooks/",
+    "migrations/",
+    "scripts/",
+    "src/",
+    "test/",
+    "docs/README.md",
+    "docs/getting-started.md",
+    "docs/configuration.md",
+    "docs/operations.md",
+    "docs/migration.md",
+    "docs/development.md",
+    ".env.example",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "SUPPORT.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/verify-release.mjs --check-only",
+    "verify": "node scripts/verify-release.mjs",
+    "start": "node src/cli.js serve"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "keywords": [
+    "codex",
+    "skill",
+    "telegram",
+    "alerts",
+    "automation"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dansasser/gorombo-skill-harvester.git"
+  },
+  "homepage": "https://github.com/dansasser/gorombo-skill-harvester#readme",
+  "bugs": {
+    "url": "https://github.com/dansasser/gorombo-skill-harvester/issues"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+*.tgz
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+.gorombo/
+.DS_Store
+Thumbs.db

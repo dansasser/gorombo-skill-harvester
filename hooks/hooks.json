@@ -1,0 +1,17 @@
+{
+  "description": "Submit successful Codex goal completions to Gorombo Skill Harvester.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "update_goal|functions.update_goal",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/completion-hook.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "gorombo-skill-harvester",
+  "version": "0.1.2",
+  "description": "Turns completed Codex work into durable skill recommendations and useful alerts.",
+  "author": {
+    "name": "Gorombo"
+  },
+  "homepage": "https://github.com/dansasser/gorombo-skill-harvester#readme",
+  "repository": "https://github.com/dansasser/gorombo-skill-harvester",
+  "license": "MIT",
+  "keywords": ["codex", "skills", "harvester", "telegram", "alerts"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Gorombo Skill Harvester",
+    "shortDescription": "Harvest reusable work and send useful alerts",
+    "longDescription": "Create durable skill recommendations from completed Codex work, then deliver readable alerts through Telegram, a selected Codex task, or both.",
+    "developerName": "Gorombo",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Check Gorombo Skill Harvester readiness and finish setup.",
+      "Harvest this completed work into a skill recommendation.",
+      "Show Gorombo Skill Harvester delivery and recovery status."
+    ]
+  }
+}

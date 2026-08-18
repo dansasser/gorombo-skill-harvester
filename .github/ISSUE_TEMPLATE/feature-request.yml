@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a focused improvement to Gorombo Skill Harvester
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem should Gorombo Skill Harvester solve?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the behavior you want without prescribing an implementation unless it matters.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Skill harvesting
+        - Telegram alerts
+        - Telegram tasks
+        - Codex task delivery
+        - Installation and onboarding
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add sanitized examples or alternatives you considered.
