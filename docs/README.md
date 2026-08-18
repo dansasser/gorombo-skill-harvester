@@ -4,7 +4,7 @@ This directory contains the longer public guides that support the concise root R
 
 ## User guides
 
-- [Getting started](getting-started.md): source installation, onboarding, route setup, and service installation.
+- [Getting started](getting-started.md): installation, onboarding, route setup, and service installation.
 - [Configuration](configuration.md): runtime roots, environment variables, routes, sandboxes, and private state.
 - [Operations](operations.md): status, service lifecycle, route controls, recommendations, recovery, and troubleshooting.
 - [Migration](migration.md): supported import from an existing TeleCodex installation.

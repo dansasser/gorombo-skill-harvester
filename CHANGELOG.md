@@ -2,6 +2,16 @@
 
 Notable user-visible changes to Gorombo Skill Harvester are recorded here.
 
+## 0.1.3 - 2026-08-17
+
+### Added
+
+- A linked DeepWiki badge for the public repository documentation.
+
+### Changed
+
+- Installation and getting-started instructions now use the published npm package.
+
 ## 0.1.2 - 2026-08-17
 
 ### Added

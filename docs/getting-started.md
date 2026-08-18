@@ -8,18 +8,18 @@
 
 Run Gorombo Skill Harvester as the same operating-system user that owns the Codex installation and authentication state.
 
-## Install from source
+## Install the public package
 
-From the repository root:
+Install the published package globally:
 
 ```sh
-npm install
-npm run verify
-npm install --global .
+npm install --global @gorombo/gorombo-skill-harvester
 gorombo-skill-harvester preflight --json
 ```
 
-The global install exposes the `gorombo-skill-harvester` command. Connect this repository as a local Codex plugin so Codex can load the included skill and completion hook.
+The installation provides the `gorombo-skill-harvester` command and the packaged Codex plugin files.
+
+For repository development, testing, and release verification, see [Development](development.md).
 
 Preflight verifies the required Node version, discovers a compatible stable Codex CLI, checks Codex authentication, and confirms that Codex App Server is available. Its output excludes launcher paths, authentication details, and raw probe output.
 
