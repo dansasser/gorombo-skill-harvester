@@ -479,7 +479,7 @@ test("explicit runtime recovery clears only a healthy runtime latch", async func
     await writeHeartbeat(layout, ownership, "RECOVERY_REQUIRED", 7, Date.now());
     assert.equal(await releaseRuntimeLock(layout, ownership), true);
 
-    const result = await recoverRuntime({ codexRoot: temporary.root });
+    const result = await recoverRuntime({ codexRoot: temporary.root, runPreflight: preflightOk });
     assert.equal(result.status, "recovered");
     assert.equal(result.recovery, "runtime");
     assert.equal(result.restartRequired, true);
@@ -511,7 +511,7 @@ test("runtime recovery refuses active ownership and domain recovery rows", async
     await onboard({ codexRoot: temporary.root, routeMode: "session", runPreflight: preflightOk });
     ownership = await acquireRuntimeLock(layout);
     await writeHeartbeat(layout, ownership, "RECOVERY_REQUIRED", 1, Date.now());
-    await assert.rejects(recoverRuntime({ codexRoot: temporary.root }), /runtime_lock_busy/);
+    await assert.rejects(recoverRuntime({ codexRoot: temporary.root, runPreflight: preflightOk }), /runtime_lock_busy/);
     assert.equal((await readHeartbeat(layout)).state, "RECOVERY_REQUIRED");
     assert.equal(await releaseRuntimeLock(layout, ownership), true);
     ownership = null;
@@ -519,7 +519,7 @@ test("runtime recovery refuses active ownership and domain recovery rows", async
     const storage = openStorage(layout.databaseFile, { create: false });
     try { storage.setRouteState("session", "RECOVERY_REQUIRED"); }
     finally { storage.close(); }
-    await assert.rejects(recoverRuntime({ codexRoot: temporary.root }), /recovery_scope_incomplete/);
+    await assert.rejects(recoverRuntime({ codexRoot: temporary.root, runPreflight: preflightOk }), /recovery_scope_incomplete/);
     assert.equal((await readHeartbeat(layout)).state, "RECOVERY_REQUIRED");
     assert.equal(await readRuntimeLock(layout), null);
   } finally {

@@ -22,7 +22,7 @@ async function fixture() {
 function testEndpoint(layout, label) {
   return process.platform === "win32"
     ? "\\\\.\\pipe\\gorombo-skill-harvester-test-" + label + "-" + process.pid + "-" + Date.now()
-    : path.join(layout.runtimeDir, label + "-" + process.pid + "-" + Date.now() + ".sock");
+    : path.join(os.tmpdir(), "gsh-" + label + "-" + process.pid + "-" + Date.now() + ".sock");
 }
 
 test("runtime ownership, heartbeat, and process-identity recovery are fenced", async function () {
