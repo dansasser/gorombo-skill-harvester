@@ -1,6 +1,6 @@
 {
   "name": "gorombo-skill-harvester",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Turns completed Codex work into durable skill recommendations and useful alerts.",
   "author": {
     "name": "Gorombo"
