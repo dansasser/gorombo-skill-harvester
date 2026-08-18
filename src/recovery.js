@@ -1,6 +1,5 @@
 import { readConfig } from "./config.js";
 import { buildLayout, resolveCodexRoot } from "./paths.js";
-import { runPreflight } from "./preflight.js";
 import { storageReadiness } from "./readiness.js";
 import { acquireRuntimeLock, readHeartbeat, releaseRuntimeLock, writeHeartbeat } from "./runtime-lock.js";
 import { openStorage } from "./storage.js";
@@ -12,7 +11,6 @@ function codedError(code) {
 }
 
 export async function recoverRuntime(options = {}) {
-  await (options.runPreflight || runPreflight)();
   const environment = options.env || process.env;
   const codexRoot = resolveCodexRoot({ explicitRoot: options.codexRoot, env: environment, home: options.home });
   const layout = buildLayout(codexRoot);
