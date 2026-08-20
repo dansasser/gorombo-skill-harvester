@@ -1,6 +1,6 @@
 {
   "name": "@gorombo/gorombo-skill-harvester",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Durable Codex skill harvesting with Telegram and selected-task delivery.",
   "type": "module",
   "private": false,

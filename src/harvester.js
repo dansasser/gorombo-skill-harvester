@@ -199,9 +199,23 @@ export function recordAssessment(storage, claim, catalog, rawOutcome, assessment
   const outcome = validateAssessmentOutcome(rawOutcome, catalog.snapshot);
   const assessmentId = createId("asm");
   let recommendation = null;
-  if (outcome.decision === "propose-new") {
+  if (outcome.decision === "propose-new" || outcome.decision === "extend-existing") {
     const recommendationId = createId("rec");
-    const content = finalizeRecommendation({ ...outcome.recommendation, sourceRevision: claim.sourceRevision }, recommendationId, now);
+    let draft;
+    if (outcome.decision === "extend-existing") {
+      draft = {
+        decision: outcome.decision,
+        targetSkillRef: outcome.targetSkillRef,
+        targetSkillName: outcome.targetSkillName,
+        whyRecommended: outcome.reasonSummary,
+        extensionSummary: outcome.extensionSummary,
+        nextReviewAction: "Review and update the existing skill.",
+        sourceRevision: claim.sourceRevision
+      };
+    } else {
+      draft = { ...outcome.recommendation, decision: outcome.decision, sourceRevision: claim.sourceRevision };
+    }
+    const content = finalizeRecommendation(draft, recommendationId, now);
     const canonical = serializeCanonicalJson(content);
     const markdown = renderCanonicalMarkdown(content);
     recommendation = { id: recommendationId, content, canonical, markdown, relativePath: "recommendations/" + recommendationId + ".md" };
@@ -238,19 +252,37 @@ export function recordAssessment(storage, claim, catalog, rawOutcome, assessment
 
 function rebuildRecommendation(row) {
   const parsed = JSON.parse(row.canonical_json);
-  const draft = {
-    skillName: parsed.skillName,
-    purpose: parsed.purpose,
-    whyRecommended: parsed.whyRecommended,
-    whenToUse: parsed.whenToUse,
-    suggestedProcedure: parsed.suggestedProcedure,
-    evidenceSummary: parsed.evidenceSummary,
-    proposedFiles: parsed.proposedFiles,
-    resources: parsed.resources,
-    overlapSummary: parsed.overlapSummary,
-    exclusions: parsed.exclusions,
-    nextReviewAction: parsed.nextReviewAction
-  };
+  let draft;
+  if (parsed.decision === "extend-existing") {
+    draft = {
+      decision: "extend-existing",
+      targetSkillRef: parsed.targetSkillRef,
+      targetSkillName: parsed.targetSkillName,
+      whyRecommended: parsed.whyRecommended,
+      extensionSummary: parsed.extensionSummary,
+      evidenceSummary: parsed.evidenceSummary,
+      proposedFiles: parsed.proposedFiles,
+      resources: parsed.resources,
+      overlapSummary: parsed.overlapSummary,
+      exclusions: parsed.exclusions,
+      nextReviewAction: parsed.nextReviewAction
+    };
+  } else {
+    draft = {
+      decision: "propose-new",
+      skillName: parsed.skillName,
+      purpose: parsed.purpose,
+      whyRecommended: parsed.whyRecommended,
+      whenToUse: parsed.whenToUse,
+      suggestedProcedure: parsed.suggestedProcedure,
+      evidenceSummary: parsed.evidenceSummary,
+      proposedFiles: parsed.proposedFiles,
+      resources: parsed.resources,
+      overlapSummary: parsed.overlapSummary,
+      exclusions: parsed.exclusions,
+      nextReviewAction: parsed.nextReviewAction
+    };
+  }
   if (parsed.sourceRevision !== undefined) draft.sourceRevision = parsed.sourceRevision;
   const rebuilt = finalizeRecommendation(draft, parsed.recommendationId, parsed.createdAt);
   const canonical = serializeCanonicalJson(rebuilt);

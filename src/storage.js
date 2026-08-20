@@ -8,7 +8,8 @@ import { sha256 } from "./ids.js";
 const MIGRATIONS = Object.freeze([
   Object.freeze({ version: 1, file: fileURLToPath(new URL("../migrations/001-initial.sql", import.meta.url)) }),
   Object.freeze({ version: 2, file: fileURLToPath(new URL("../migrations/002-external-alerts.sql", import.meta.url)) }),
-  Object.freeze({ version: 3, file: fileURLToPath(new URL("../migrations/003-generic-external-alert-source.sql", import.meta.url)) })
+  Object.freeze({ version: 3, file: fileURLToPath(new URL("../migrations/003-generic-external-alert-source.sql", import.meta.url)) }),
+  Object.freeze({ version: 4, file: fileURLToPath(new URL("../migrations/004-extend-existing-recommendations.sql", import.meta.url)) })
 ]);
 
 const LEGACY_MIGRATION_CHECKSUMS = Object.freeze(new Map([

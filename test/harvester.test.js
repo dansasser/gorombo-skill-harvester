@@ -99,7 +99,7 @@ test("propose-new becomes owner visible and directly queues a readable alert", a
   }
 });
 
-test("extend-existing commits the preferred skill reference without recommendation or alert", async function () {
+test("extend-existing commits the preferred skill reference with recommendation and alert", async function () {
   const x = await fixture();
   try {
     const intake = acceptCompletion(x.storage, event(), 101);
@@ -116,23 +116,41 @@ test("extend-existing commits the preferred skill reference without recommendati
       extensionSummary
     }, "test", 104);
     assert.equal(result.decision, "extend-existing");
-    assert.equal(result.recommendationId, null);
+    assert.notEqual(result.recommendationId, null);
     assert.equal(result.completionId, intake.completionId);
     const assessment = x.storage.db.prepare(
       "SELECT decision,target_skill_ref,target_skill_name,extension_summary,recommendation_id,recommendation_json,recommendation_digest FROM assessments WHERE completion_id=?"
     ).get(intake.completionId);
-    assert.deepEqual({ ...assessment }, {
-      decision: "extend-existing",
-      target_skill_ref: target.skillRef,
-      target_skill_name: target.name,
-      extension_summary: extensionSummary,
-      recommendation_id: null,
-      recommendation_json: null,
-      recommendation_digest: null
-    });
-    assert.equal(x.storage.db.prepare("SELECT state FROM completion_events WHERE id=?").get(intake.completionId).state, "ACKNOWLEDGED");
-    assert.equal(x.storage.db.prepare("SELECT COUNT(*) AS n FROM recommendations").get().n, 0);
-    assert.equal(x.storage.db.prepare("SELECT COUNT(*) AS n FROM delivery_outbox").get().n, 0);
+    assert.equal(assessment.decision, "extend-existing");
+    assert.equal(assessment.target_skill_ref, target.skillRef);
+    assert.equal(assessment.target_skill_name, target.name);
+    assert.equal(assessment.extension_summary, extensionSummary);
+    assert.equal(assessment.recommendation_id, result.recommendationId);
+    assert.notEqual(assessment.recommendation_json, null);
+    assert.notEqual(assessment.recommendation_digest, null);
+
+    assert.equal(x.storage.db.prepare("SELECT state FROM completion_events WHERE id=?").get(intake.completionId).state, "PUBLICATION_PENDING");
+    assert.equal(x.storage.db.prepare("SELECT COUNT(*) AS n FROM recommendations").get().n, 1);
+
+    let wakes = 0;
+    const publication = await publishRecommendation(x.storage, x.layout, assessment.recommendation_id, function () { wakes += 1; }, 105);
+    assert.equal(wakes, 1);
+    assert.equal(publication.outboxIds.length, 1);
+    const completion = x.storage.db.prepare("SELECT state FROM completion_events WHERE id=?").get(intake.completionId);
+    const recommendation = x.storage.db.prepare("SELECT visibility_state,markdown_relative_path FROM recommendations WHERE id=?").get(assessment.recommendation_id);
+    const outbox = x.storage.db.prepare("SELECT state,route FROM delivery_outbox WHERE recommendation_id=?").get(assessment.recommendation_id);
+
+    assert.equal(completion.state, "ACKNOWLEDGED");
+    assert.equal(recommendation.visibility_state, "OWNER_VISIBLE");
+    assert.equal(outbox.state, "QUEUED");
+    assert.equal(outbox.route, "telegram");
+
+    const markdown = await fsp.readFile(path.join(x.layout.productRoot, ...recommendation.markdown_relative_path.split("/")), "utf8");
+    assert.match(markdown, /# Skill extension: /);
+    assert.match(markdown, new RegExp(target.name));
+    assert.match(markdown, /## Extension summary/);
+    assert.match(markdown, /Add the bounded release\\-verification procedure to this skill/);
+    assert.match(markdown, /## Next review action/);
   } finally {
     x.storage.close();
     await fsp.rm(x.root, { recursive: true, force: true });

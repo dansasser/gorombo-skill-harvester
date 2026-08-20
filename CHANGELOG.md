@@ -2,6 +2,12 @@
 
 Notable user-visible changes to Gorombo Skill Harvester are recorded here.
 
+## 0.1.4 - 2026-08-18
+
+### Changed
+- Make "extend-existing" harvested findings actionable. They now produce a recommendation and are delivered to enabled routes rather than being silently recorded. The existing skill is not automatically modified.
+- Include the existing skill name and extension context in the delivered alert.
+
 ## 0.1.3 - 2026-08-17
 
 ### Added

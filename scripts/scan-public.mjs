@@ -113,7 +113,7 @@ function normalizedSystemText(value) {
 
 const systemMarkers = new Set();
 for (const candidate of [packageRoot, os.homedir(), os.hostname()]) {
-  if (typeof candidate === "string" && candidate.length >= 3) systemMarkers.add(normalizedSystemText(candidate));
+  if (typeof candidate === "string" && candidate.length >= 3 && candidate !== "/app") systemMarkers.add(normalizedSystemText(candidate));
 }
 for (const records of Object.values(os.networkInterfaces())) {
   for (const record of records || []) {

@@ -14,7 +14,7 @@ test("fresh storage applies the frozen schema and migration", function () {
   try {
     const status = storage.integrityCheck();
     assert.equal(status.ok, true);
-    assert.equal(status.schemaVersion, 3);
+    assert.equal(status.schemaVersion, 4);
     assert.equal(status.applicationId, SQLITE_APPLICATION_ID);
     assert.equal(storage.getSetting("missing"), null);
     assert.equal(storage.setSetting("mode", { route: "both" }, 1234), 1);
@@ -41,9 +41,9 @@ test("version-one storage upgrades in place without changing existing rows", asy
   }
   const storage = openStorage(databaseFile, { create: false, now: 2000 });
   try {
-    assert.equal(storage.integrityCheck().schemaVersion, 3);
+    assert.equal(storage.integrityCheck().schemaVersion, 4);
     assert.deepEqual(storage.getSetting("preserved"), { ok: true });
-    assert.equal(storage.db.prepare("SELECT COUNT(*) AS count FROM schema_migrations").get().count, 3);
+    assert.equal(storage.db.prepare("SELECT COUNT(*) AS count FROM schema_migrations").get().count, 4);
     assert.equal(storage.db.prepare("SELECT COUNT(*) AS count FROM pragma_foreign_key_check").get().count, 0);
     assert.ok(storage.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='external_alert_deliveries'").get());
   } finally {
@@ -81,7 +81,7 @@ test("version-two storage preserves external alerts while replacing its private 
       external_key: "legacy-key",
       message_private: "Source: External Harvester\n\nPreserved alert"
     });
-    assert.equal(storage.integrityCheck().schemaVersion, 3);
+    assert.equal(storage.integrityCheck().schemaVersion, 4);
   } finally {
     storage.close();
     await fsp.rm(root, { recursive: true, force: true });
