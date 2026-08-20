@@ -3,6 +3,7 @@ import { sha256 } from "./ids.js";
 import { validateStoredRelative } from "./paths.js";
 
 const DRAFT_KEYS = new Set([
+  "decision", "targetSkillRef", "targetSkillName", "extensionSummary",
   "skillName", "purpose", "whyRecommended", "whenToUse", "suggestedProcedure",
   "evidenceSummary", "proposedFiles", "resources", "overlapSummary",
   "exclusions", "nextReviewAction", "sourceRevision"
@@ -79,27 +80,54 @@ function validateReference(value) {
 function requireExactDraftKeys(draft) {
   if (!draft || typeof draft !== "object" || Array.isArray(draft)) throw new Error("draft_invalid");
   for (const key of Object.keys(draft)) if (!DRAFT_KEYS.has(key)) throw new Error("draft_unknown_field");
-  for (const required of ["skillName", "purpose", "whyRecommended", "whenToUse", "suggestedProcedure", "nextReviewAction"]) {
-    if (!Object.hasOwn(draft, required)) throw new Error("draft_missing_field");
+  if (draft.decision === "extend-existing") {
+    for (const required of ["targetSkillRef", "targetSkillName", "whyRecommended", "extensionSummary", "nextReviewAction"]) {
+      if (!Object.hasOwn(draft, required)) throw new Error("draft_missing_field");
+    }
+  } else {
+    for (const required of ["skillName", "purpose", "whyRecommended", "whenToUse", "suggestedProcedure", "nextReviewAction"]) {
+      if (!Object.hasOwn(draft, required)) throw new Error("draft_missing_field");
+    }
   }
 }
 
 export function validateDraft(draft) {
   requireExactDraftKeys(draft);
-  const normalized = {
-    skillName: normalizeText(draft.skillName, "skill_name", 1, 80),
-    purpose: normalizeText(draft.purpose, "purpose", 1, 500),
-    whyRecommended: normalizeText(draft.whyRecommended, "why_recommended", 1, 1200),
-    whenToUse: normalizeList(draft.whenToUse, "when_to_use", 1, 8, 300),
-    suggestedProcedure: normalizeList(draft.suggestedProcedure, "suggested_procedure", 1, 12, 500),
-    evidenceSummary: normalizeList(draft.evidenceSummary || [], "evidence_summary", 0, 6, 300),
-    proposedFiles: [],
-    resources: [],
-    overlapSummary: normalizeText(draft.overlapSummary || "", "overlap_summary", 0, 800, true),
-    exclusions: normalizeList(draft.exclusions || [], "exclusions", 0, 8, 300),
-    nextReviewAction: normalizeText(draft.nextReviewAction, "next_review_action", 1, 500),
-    sourceRevision: draft.sourceRevision === undefined ? undefined : normalizeText(draft.sourceRevision, "source_revision", 1, 128)
-  };
+  const decision = draft.decision === "extend-existing" ? "extend-existing" : "propose-new";
+
+  let normalized;
+  if (decision === "extend-existing") {
+    normalized = {
+      decision: "extend-existing",
+      targetSkillRef: normalizeText(draft.targetSkillRef, "target_skill_ref", 1, 200),
+      targetSkillName: normalizeText(draft.targetSkillName, "target_skill_name", 1, 80),
+      whyRecommended: normalizeText(draft.whyRecommended, "why_recommended", 1, 1200),
+      extensionSummary: normalizeText(draft.extensionSummary, "extension_summary", 1, 1200),
+      evidenceSummary: normalizeList(draft.evidenceSummary || [], "evidence_summary", 0, 6, 300),
+      proposedFiles: [],
+      resources: [],
+      overlapSummary: "",
+      exclusions: [],
+      nextReviewAction: normalizeText(draft.nextReviewAction, "next_review_action", 1, 500),
+      sourceRevision: draft.sourceRevision === undefined ? undefined : normalizeText(draft.sourceRevision, "source_revision", 1, 128)
+    };
+  } else {
+    normalized = {
+      decision: "propose-new",
+      skillName: normalizeText(draft.skillName, "skill_name", 1, 80),
+      purpose: normalizeText(draft.purpose, "purpose", 1, 500),
+      whyRecommended: normalizeText(draft.whyRecommended, "why_recommended", 1, 1200),
+      whenToUse: normalizeList(draft.whenToUse, "when_to_use", 1, 8, 300),
+      suggestedProcedure: normalizeList(draft.suggestedProcedure, "suggested_procedure", 1, 12, 500),
+      evidenceSummary: normalizeList(draft.evidenceSummary || [], "evidence_summary", 0, 6, 300),
+      proposedFiles: [],
+      resources: [],
+      overlapSummary: normalizeText(draft.overlapSummary || "", "overlap_summary", 0, 800, true),
+      exclusions: normalizeList(draft.exclusions || [], "exclusions", 0, 8, 300),
+      nextReviewAction: normalizeText(draft.nextReviewAction, "next_review_action", 1, 500),
+      sourceRevision: draft.sourceRevision === undefined ? undefined : normalizeText(draft.sourceRevision, "source_revision", 1, 128)
+    };
+  }
   if (!Array.isArray(draft.proposedFiles || []) || (draft.proposedFiles || []).length > 20) throw new Error("proposed_files_invalid");
   normalized.proposedFiles = (draft.proposedFiles || []).map(function (item) {
     if (!item || typeof item !== "object" || Array.isArray(item) || JSON.stringify(Object.keys(item).sort()) !== JSON.stringify(["path", "purpose"])) throw new Error("proposed_files_invalid");
@@ -125,15 +153,11 @@ export function validateDraft(draft) {
 export function finalizeRecommendation(draft, recommendationId, createdAt) {
   const normalized = validateDraft(draft);
   if (!/^rec_[0-9a-f]{32}$/u.test(recommendationId) || !Number.isSafeInteger(createdAt) || createdAt < 0) throw new Error("recommendation_identity_invalid");
+
   const content = {
     contentSchemaVersion: CONTENT_SCHEMA_VERSION,
     recommendationId,
-    decision: "propose-new",
-    skillName: normalized.skillName,
-    purpose: normalized.purpose,
-    whyRecommended: normalized.whyRecommended,
-    whenToUse: normalized.whenToUse,
-    suggestedProcedure: normalized.suggestedProcedure,
+    decision: normalized.decision,
     evidenceSummary: normalized.evidenceSummary,
     proposedFiles: normalized.proposedFiles,
     resources: normalized.resources,
@@ -142,6 +166,19 @@ export function finalizeRecommendation(draft, recommendationId, createdAt) {
     nextReviewAction: normalized.nextReviewAction,
     createdAt
   };
+
+  if (normalized.decision === "extend-existing") {
+    content.targetSkillRef = normalized.targetSkillRef;
+    content.targetSkillName = normalized.targetSkillName;
+    content.whyRecommended = normalized.whyRecommended;
+    content.extensionSummary = normalized.extensionSummary;
+  } else {
+    content.skillName = normalized.skillName;
+    content.purpose = normalized.purpose;
+    content.whyRecommended = normalized.whyRecommended;
+    content.whenToUse = normalized.whenToUse;
+    content.suggestedProcedure = normalized.suggestedProcedure;
+  }
   if (normalized.sourceRevision !== undefined) content.sourceRevision = normalized.sourceRevision;
   const serialized = serializeCanonicalJson(content);
   if (serialized.bytes.length > MAX_JSON_BYTES) throw new Error("recommendation_too_large");
@@ -149,7 +186,7 @@ export function finalizeRecommendation(draft, recommendationId, createdAt) {
 }
 
 export function serializeCanonicalJson(content) {
-  if (!content || content.contentSchemaVersion !== CONTENT_SCHEMA_VERSION || content.decision !== "propose-new") throw new Error("content_version_invalid");
+  if (!content || content.contentSchemaVersion !== CONTENT_SCHEMA_VERSION || !["propose-new", "extend-existing"].includes(content.decision)) throw new Error("content_version_invalid");
   const text = JSON.stringify(content) + "\n";
   const bytes = Buffer.from(text, "utf8");
   return { text, bytes, digest: sha256(bytes) };
@@ -167,23 +204,47 @@ function listSection(title, items, ordered = false) {
 }
 
 export function renderCanonicalMarkdown(content) {
-  const lines = [
-    "# Skill recommendation: " + escapeMarkdown(content.skillName),
-    "",
-    "Recommendation ID: " + escapeMarkdown(content.recommendationId),
-    "",
-    "## Purpose",
-    "",
-    escapeMarkdown(content.purpose),
-    "",
-    "## Why this is recommended",
-    "",
-    escapeMarkdown(content.whyRecommended)
-  ];
-  let text = lines.join("\n") + "\n";
-  text += listSection("When to use it", content.whenToUse);
-  text += listSection("Suggested procedure", content.suggestedProcedure, true);
-  text += listSection("Evidence summary", content.evidenceSummary);
+  let lines = [];
+  let text = "";
+  if (content.decision === "extend-existing") {
+    lines = [
+      "# Skill extension: " + escapeMarkdown(content.targetSkillName),
+      "",
+      "Recommendation ID: " + escapeMarkdown(content.recommendationId),
+      "",
+      "## Target skill",
+      "",
+      escapeMarkdown(content.targetSkillRef),
+      "",
+      "## Why this is recommended",
+      "",
+      escapeMarkdown(content.whyRecommended),
+      "",
+      "## Extension summary",
+      "",
+      escapeMarkdown(content.extensionSummary)
+    ];
+    text = lines.join("\n") + "\n";
+    text += listSection("Evidence summary", content.evidenceSummary);
+  } else {
+    lines = [
+      "# Skill recommendation: " + escapeMarkdown(content.skillName),
+      "",
+      "Recommendation ID: " + escapeMarkdown(content.recommendationId),
+      "",
+      "## Purpose",
+      "",
+      escapeMarkdown(content.purpose),
+      "",
+      "## Why this is recommended",
+      "",
+      escapeMarkdown(content.whyRecommended)
+    ];
+    text = lines.join("\n") + "\n";
+    text += listSection("When to use it", content.whenToUse);
+    text += listSection("Suggested procedure", content.suggestedProcedure, true);
+    text += listSection("Evidence summary", content.evidenceSummary);
+  }
   if (content.proposedFiles.length > 0) text += "\n## Proposed files\n\n" + content.proposedFiles.map(function (item) {
     return "- " + escapeMarkdown(item.path) + " - " + escapeMarkdown(item.purpose);
   }).join("\n") + "\n";
@@ -198,26 +259,44 @@ export function renderCanonicalMarkdown(content) {
 }
 
 function fullAlert(content, limits = {}) {
-  const triggers = content.whenToUse.slice(0, limits.triggers || content.whenToUse.length);
-  const steps = content.suggestedProcedure.slice(0, limits.steps || content.suggestedProcedure.length);
-  const parts = [
-    "Skill recommendation: " + content.skillName,
-    "",
-    "Purpose: " + content.purpose,
-    "",
-    "Why: " + content.whyRecommended,
-    "",
-    "Use it when:",
-    ...triggers.map(function (item) { return "- " + item; }),
-    "",
-    "Suggested procedure:",
-    ...steps.map(function (item, index) { return String(index + 1) + ". " + item; }),
-    "",
-    "Next: " + content.nextReviewAction,
-    "",
-    "Saved recommendation: " + content.recommendationId,
-    "Location: recommendations/" + content.recommendationId + ".md"
-  ];
+  let parts;
+  if (content.decision === "extend-existing") {
+    parts = [
+      "Skill extension: " + content.targetSkillName,
+      "",
+      "Target skill: " + content.targetSkillRef,
+      "",
+      "Why: " + content.whyRecommended,
+      "",
+      "Extension summary: " + content.extensionSummary,
+      "",
+      "Next: " + content.nextReviewAction,
+      "",
+      "Saved recommendation: " + content.recommendationId,
+      "Location: recommendations/" + content.recommendationId + ".md"
+    ];
+  } else {
+    const triggers = content.whenToUse.slice(0, limits.triggers || content.whenToUse.length);
+    const steps = content.suggestedProcedure.slice(0, limits.steps || content.suggestedProcedure.length);
+    parts = [
+      "Skill recommendation: " + content.skillName,
+      "",
+      "Purpose: " + content.purpose,
+      "",
+      "Why: " + content.whyRecommended,
+      "",
+      "Use it when:",
+      ...triggers.map(function (item) { return "- " + item; }),
+      "",
+      "Suggested procedure:",
+      ...steps.map(function (item, index) { return String(index + 1) + ". " + item; }),
+      "",
+      "Next: " + content.nextReviewAction,
+      "",
+      "Saved recommendation: " + content.recommendationId,
+      "Location: recommendations/" + content.recommendationId + ".md"
+    ];
+  }
   return parts.join("\n");
 }
 
@@ -229,6 +308,16 @@ function atWordBoundary(value, maximum) {
 }
 
 function compactAlert(content) {
+  if (content.decision === "extend-existing") {
+    return [
+      "Skill extension: " + content.targetSkillName,
+      "Target skill: " + atWordBoundary(content.targetSkillRef, 180),
+      "Why: " + atWordBoundary(content.whyRecommended, 300),
+      "Summary: " + atWordBoundary(content.extensionSummary, 240),
+      "Next: " + atWordBoundary(content.nextReviewAction, 240),
+      "Saved: " + content.recommendationId + " at recommendations/" + content.recommendationId + ".md"
+    ].join("\n");
+  }
   return [
     "Skill recommendation: " + content.skillName,
     "Why: " + atWordBoundary(content.whyRecommended, 300),
@@ -247,13 +336,16 @@ export function renderDeliveryMessage(content, route, budget) {
   const omittedSections = [];
   if (Buffer.byteLength(plainText, "utf8") > budget) {
     omittedSections.push("optional-sections");
-    const shortened = {
-      ...content,
-      purpose: atWordBoundary(content.purpose, 240),
-      whyRecommended: atWordBoundary(content.whyRecommended, 500),
-      whenToUse: content.whenToUse.slice(0, 3).map(function (item) { return atWordBoundary(item, 180); }),
-      suggestedProcedure: content.suggestedProcedure.slice(0, 5).map(function (item) { return atWordBoundary(item, 240); })
-    };
+    let shortened = { ...content };
+    if (content.decision === "extend-existing") {
+      shortened.whyRecommended = atWordBoundary(content.whyRecommended, 500);
+      shortened.extensionSummary = atWordBoundary(content.extensionSummary, 500);
+    } else {
+      shortened.purpose = atWordBoundary(content.purpose, 240);
+      shortened.whyRecommended = atWordBoundary(content.whyRecommended, 500);
+      shortened.whenToUse = content.whenToUse.slice(0, 3).map(function (item) { return atWordBoundary(item, 180); });
+      shortened.suggestedProcedure = content.suggestedProcedure.slice(0, 5).map(function (item) { return atWordBoundary(item, 240); });
+    }
     plainText = prefix + fullAlert(shortened, { triggers: 3, steps: 5 });
   }
   if (Buffer.byteLength(plainText, "utf8") > budget) {
@@ -267,7 +359,7 @@ export function renderDeliveryMessage(content, route, budget) {
     payloadVersion: PAYLOAD_VERSION,
     recommendationId: content.recommendationId,
     route,
-    title: "Skill recommendation: " + content.skillName,
+    title: (content.decision === "extend-existing" ? "Skill extension: " + content.targetSkillName : "Skill recommendation: " + content.skillName),
     plainText,
     canonicalContentDigest: serialized.digest,
     renderedDigest: sha256(Buffer.from(plainText, "utf8")),

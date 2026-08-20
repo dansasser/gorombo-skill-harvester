@@ -1,6 +1,6 @@
 # Gorombo Skill Harvester
 
-[![Version](https://img.shields.io/badge/version-0.1.3-blue)](package.json)
+[![Version](https://img.shields.io/badge/version-0.1.4-blue)](package.json)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.13-brightgreen)](https://nodejs.org/)
 [![Codex](https://img.shields.io/badge/Codex_CLI-%3E%3D0.147-111827)](https://developers.openai.com/codex/cli/)
 [![Gorombo](https://img.shields.io/badge/by-Gorombo-black)](https://gorombo.com/)
@@ -205,7 +205,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
 
 ## Release
 
-Version 0.1.3 is the current public release.
+Version 0.1.4 is the current public release.
 
 ## License
 

@@ -312,8 +312,8 @@ CREATE TABLE assessments (
       AND recommendation_json IS NULL AND recommendation_digest IS NULL)
     OR
     (decision='extend-existing' AND target_skill_ref IS NOT NULL
-      AND extension_summary IS NOT NULL AND recommendation_id IS NULL
-      AND recommendation_json IS NULL AND recommendation_digest IS NULL)
+      AND extension_summary IS NOT NULL AND recommendation_id IS NOT NULL
+      AND recommendation_json IS NOT NULL AND recommendation_digest IS NOT NULL)
     OR
     (decision='propose-new' AND target_skill_ref IS NULL
       AND extension_summary IS NULL AND recommendation_id IS NOT NULL
@@ -568,7 +568,7 @@ SQLite constraints are necessary but not sufficient for cross-row or digest equa
 
 - `skill_catalog_snapshots.revision` equals lowercase SHA-256 over the exact UTF-8 bytes stored in `canonical_json`.
 - For TaskCompletionEvent version 1, `completion_events.source_event_id` equals `correlation_key`, and recomputing the canonical identity from `source_platform`, `task_id`, `source_generation`, and `source_revision` yields the same key.
-- A `propose-new` assessment has exactly one related recommendation, and its `recommendation_id`, `recommendation_json`, and `recommendation_digest` equal the related recommendation row fields `id`, `canonical_json`, and `canonical_json_digest`. Other assessment decisions have no recommendation values and no recommendation row for that completion.
+- A `propose-new` or `extend-existing` assessment has exactly one related recommendation, and its `recommendation_id`, `recommendation_json`, and `recommendation_digest` equal the related recommendation row fields `id`, `canonical_json`, and `canonical_json_digest`. The `not-a-skill` assessment decision has no recommendation values and no recommendation row for that completion.
 - A route test allocates `test_generation` as `COALESCE(MAX(test_generation), -1) + 1` for one route and configuration revision inside the route-test transaction.
 - A recommendation marked OWNER_VISIBLE has a final file at `markdown_relative_path` whose exact bytes hash to `markdown_sha256`.
 - Generation-zero fan-out rows enter INTEGRITY_PENDING. No row may enter QUEUED or RETRY_WAIT until the post-commit digest check succeeds. An integrity fault atomically moves the recommendation and completion to RECOVERY_REQUIRED and every nonterminal outbox row for that recommendation to PAUSED before any delivery wakeup.
@@ -611,7 +611,7 @@ INTEGRITY_PENDING, QUEUED, SENDING, RETRY_WAIT, SENT, DEAD_LETTER, and PAUSED. I
 | Intake | Insert completion with assessment due time or read same correlation | None |
 | Assessment claim | Fence one due completion, increment assessment attempts, set owner/token/expiry | Catalog inventory and assessor after |
 | Catalog snapshot | Insert exact canonical bytes by revision or verify identical existing row | Inventory before |
-| Assessment commit | Insert assessment; for propose-new also insert DRAFT_COMMITTED recommendation identity, canonical JSON, intended path, and digests; clear claim | Assessor and deterministic render before |
+| Assessment commit | Insert assessment; for propose-new or extend-existing also insert DRAFT_COMMITTED recommendation identity, canonical JSON, intended path, and digests; clear claim | Assessor and deterministic render before |
 | Completion acknowledgement | Conditionally mark ACKNOWLEDGED and clear due time | None |
 | Visibility plus fan-out | Verify expected draft/file state, mark visible, insert enabled route rows as INTEGRITY_PENDING, mark completion scheduled | File sync before; post-commit verify after |
 | Integrity gate | Change exact INTEGRITY_PENDING rows to QUEUED, or pause them and mark owning records RECOVERY_REQUIRED | Post-commit file verification before |
